@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tra Cứu Điểm & Xếp Hạng Sinh Viên</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      background-color: #f1f5f9;
+      color: #1e293b;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 860px;
+      background: #ffffff;
+      padding: 32px;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 24px;
+    }
+
+    /* Khu vực ô nhập và nút submit ở chính giữa */
+    .search-form {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .search-form input {
+      flex: 1;
+      padding: 12px 16px;
+      font-size: 1rem;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      outline: none;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+
+    .search-form input::placeholder {
+      text-transform: none;
+      color: #94a3b8;
+    }
+
+    .search-form input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .search-form button {
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ffffff;
+      background-color: #2563eb;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      white-space: nowrap;
+    }
+
+    .search-form button:hover {
+      background-color: #1d4ed8;
+    }
+
+    .search-form button:disabled {
+      background-color: #94a3b8;
+      cursor: not-allowed;
+    }
+
+    /* Thông báo lỗi / trạng thái */
+    .status-msg {
+      text-align: center;
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      display: none;
+    }
+
+    .status-msg.error {
+      background-color: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+
+    /* Khu vực hiển thị kết quả */
+    #resultSection {
+      display: none;
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid #e2e8f0;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Thông tin sinh viên */
+    .student-profile {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      background: #f8fafc;
+      padding: 16px 20px;
+      border-radius: 12px;
+      border-left: 4px solid #2563eb;
+      margin-bottom: 22px;
+    }
+
+    .profile-item span {
+      display: block;
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-bottom: 3px;
+    }
+
+    .profile-item strong {
+      font-size: 1.02rem;
+      color: #0f172a;
+    }
+
+    /* Bảng tổng hợp điểm và xếp hạng */
+    .table-wrapper {
+      overflow-x: auto;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.94rem;
+      min-width: 650px;
+    }
+
+    th, td {
+      padding: 13px 14px;
+      text-align: center;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    th {
+      background-color: #f1f5f9;
+      color: #334155;
+      font-weight: 600;
+      font-size: 0.88rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    td:first-child, th:first-child {
+      text-align: left;
+      padding-left: 18px;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background-color: #f8fafc;
+    }
+
+    /* Dòng trung bình tích lũy */
+    tr.overall-row {
+      background-color: #eff6ff !important;
+      font-weight: 600;
+    }
+
+    tr.overall-row td {
+      border-top: 2px solid #bfdbfe;
+      color: #1e3a8a;
+    }
+
+    .score-main {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .score-sub {
+      display: block;
+      font-size: 0.8rem;
+      color: #64748b;
+      font-weight: 400;
+      margin-top: 2px;
+    }
+
+    /* Huy hiệu thứ hạng */
+    .rank-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.86rem;
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    .rank-top1 {
+      background: #fef08a;
+      color: #854d0e;
+      border: 1px solid #fde047;
+    }
+
+    .rank-top3 {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .rank-top10 {
+      background: #e0f2fe;
+      color: #075985;
+    }
+
+    .note {
+      margin-top: 12px;
+      font-size: 0.82rem;
+      color: #64748b;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>Tra Cứu Điểm & Xếp Hạng Sinh Viên</h1>
+
+    <form class="search-form" id="searchForm">
+      <input 
+        type="text" 
+        id="studentCodeInput" 
+        placeholder="Nhập mã sinh viên (VD: 76DCTT21146)" 
+        required 
+        autocomplete="off"
+      >
+      <button type="submit" id="submitBtn" disabled>Đang tải...</button>
+    </form>
+
+    <div id="statusMsg" class="status-msg"></div>
+
+    <div id="resultSection">
+      <div class="student-profile" id="studentProfile"></div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Kỳ học</th>
+              <th>Số môn</th>
+              <th>Điểm Hệ 10</th>
+              <th>Điểm Hệ 4</th>
+              <th>Hạng Lớp</th>
+              <th>Hạng Ngành</th>
+              <th>Hạng Trường</th>
+            </tr>
+          </thead>
+          <tbody id="scoreTableBody"></tbody>
+        </table>
+      </div>
+      <div class="note">
+        * Xếp hạng tính theo <b>Điểm trung bình Hệ 10</b> (đồng điểm nhận cùng thứ hạng cao nhất).
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CSV_FILE = 'tong_hop_diem_theo_hoc_ky.csv';
+    let studentsData = [];
+    let semesters = [];
+
+    const submitBtn = document.getElementById('submitBtn');
+    const statusMsg = document.getElementById('statusMsg');
+    const resultSection = document.getElementById('resultSection');
+
+    // 1. Tải dữ liệu CSV bằng fetch khi mở trang
+    fetch(CSV_FILE)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`Không thể tải file ${CSV_FILE} (HTTP ${response.status})`);
+        }
+        return response.text();
+      })
+      .then(csvText => {
+        studentsData = parseCSV(csvText);
+        computeOverallScores(studentsData);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit';
+      })
+      .catch(err => {
+        showStatus(`Lỗi tải dữ liệu: ${err.message}. Hãy đảm bảo file "${CSV_FILE}" nằm cùng thư mục với index.html.`, true);
+        submitBtn.textContent = 'Lỗi dữ liệu';
+      });
+
+    // 2. Hàm phân tích CSV (xử lý BOM UTF-8)
+    function parseCSV(text) {
+      const cleanText = text.replace(/^\uFEFF/, '').trim();
+      const lines = cleanText.split(/\r?\n/);
+      if (lines.length < 2) return [];
+
+      const headers = lines[0].split(',').map(h => h.trim());
+
+      // Tự động lấy danh sách các kỳ học có trong CSV (VD: 2025_2026_HK1, 2025_2026_HK2)
+      const semSet = new Set();
+      headers.forEach(h => {
+        const match = h.match(/^(\d{4}_\d{4}_HK\d+)_DIEM_AVG$/);
+        if (match) semSet.add(match[1]);
+      });
+      semesters = Array.from(semSet).sort();
+
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        const values = line.split(',');
+        const obj = {};
+        headers.forEach((h, idx) => {
+          obj[h] = values[idx] !== undefined ? values[idx].trim() : '';
+        });
+        rows.push(obj);
+      }
+      return rows;
+    }
+
+    // 3. Tính điểm trung bình tích lũy gộp các kỳ (Tổng SUM / Tổng N) theo đúng Tutorial.MD
+    function computeOverallScores(data) {
+      data.forEach(student => {
+        ['DIEM', 'DIEMQUYDOI'].forEach(kind => {
+          let totalSum = 0;
+          let totalN = 0;
+
+          semesters.forEach(sem => {
+            const sumVal = parseFloat(student[`${sem}_${kind}_SUM`]);
+            const nVal = parseFloat(student[`${sem}_${kind}_N`]);
+            if (!isNaN(sumVal) && !isNaN(nVal) && nVal > 0) {
+              totalSum += sumVal;
+              totalN += nVal;
+            }
+          });
+
+          student[`OVERALL_${kind}_N`] = totalN;
+          student[`OVERALL_${kind}_SUM`] = totalSum;
+          // Lưu giá trị chính xác để xếp hạng không bị sai số làm tròn
+          student[`OVERALL_${kind}_AVG`] = totalN > 0 ? (totalSum / totalN) : NaN;
+        });
+      });
+    }
+
+    // 4. Tính thứ hạng theo chuẩn method="min" dựa trên Điểm Hệ 10
+    // groupField = 'class_name' (Lớp) | 'program_name' (Ngành) | null (Toàn trường)
+    function calculateRank(targetStudent, scoreField, groupField = null) {
+      const targetScore = parseFloat(targetStudent[scoreField]);
+      if (isNaN(targetScore)) return null;
+
+      // Lọc danh sách sinh viên cùng nhóm và có điểm hợp lệ ở kỳ đó
+      const validPeers = studentsData.filter(s => {
+        const score = parseFloat(s[scoreField]);
+        if (isNaN(score)) return false;
+        if (!groupField) return true; // Toàn trường
+        return s[groupField] === targetStudent[groupField];
+      });
+
+      // Đếm số người có điểm lớn hơn (dùng sai số 1e-9 để tránh lỗi dấu phẩy động JS)
+      const higherCount = validPeers.filter(s => (parseFloat(s[scoreField]) - targetScore) > 1e-9).length;
+
+      return {
+        rank: higherCount + 1,
+        total: validPeers.length
+      };
+    }
+
+    // 5. Định dạng badge hiển thị thứ hạng
+    function formatRankBadge(rankObj) {
+      if (!rankObj) return '-';
+      let badgeClass = 'rank-badge';
+      if (rankObj.rank === 1) badgeClass += ' rank-top1';
+      else if (rankObj.rank <= 3) badgeClass += ' rank-top3';
+      else if (rankObj.rank <= 10) badgeClass += ' rank-top10';
+
+      return `<span class="${badgeClass}">#${rankObj.rank} / ${rankObj.total}</span>`;
+    }
+
+    function showStatus(msg, isError = false) {
+      statusMsg.textContent = msg;
+      statusMsg.className = 'status-msg ' + (isError ? 'error' : '');
+      statusMsg.style.display = 'block';
+    }
+
+    // 6. Xử lý khi người dùng nhấn Submit
+    document.getElementById('searchForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const inputCode = document.getElementById('studentCodeInput').value.trim().toUpperCase();
+      if (!inputCode) return;
+
+      const student = studentsData.find(s => (s.student_code || '').toUpperCase() === inputCode);
+
+      if (!student) {
+        resultSection.style.display = 'none';
+        showStatus(`Không tìm thấy sinh viên có mã "${inputCode}".`, true);
+        return;
+      }
+
+      statusMsg.style.display = 'none';
+      resultSection.style.display = 'block';
+
+      // Hiển thị thông tin cá nhân
+      document.getElementById('studentProfile').innerHTML = `
+        <div class="profile-item">
+          <span>Họ và tên</span>
+          <strong>${student.full_name}</strong>
+        </div>
+        <div class="profile-item">
+          <span>Mã sinh viên</span>
+          <strong>${student.student_code}</strong>
+        </div>
+        <div class="profile-item">
+          <span>Lớp quản lý</span>
+          <strong>${student.class_name}</strong>
+        </div>
+        <div class="profile-item">
+          <span>Ngành / Chương trình</span>
+          <strong>${student.program_name}</strong>
+        </div>
+      `;
+
+      // Hiển thị bảng tổng hợp các kỳ học
+      const tbody = document.getElementById('scoreTableBody');
+      tbody.innerHTML = '';
+
+      semesters.forEach(sem => {
+        const semLabel = sem.replace(/^(\d{4})_(\d{4})_HK(\d+)$/, 'Học kỳ $3 ($1 - $2)');
+        const avg10Field = `${sem}_DIEM_AVG`;
+        const sum10Field = `${sem}_DIEM_SUM`;
+        const n10Field = `${sem}_DIEM_N`;
+        const avg4Field = `${sem}_DIEMQUYDOI_AVG`;
+
+        const avg10 = parseFloat(student[avg10Field]);
+        const sum10 = parseFloat(student[sum10Field]);
+        const n10 = parseFloat(student[n10Field]);
+        const avg4 = parseFloat(student[avg4Field]);
+
+        if (isNaN(avg10)) {
+          tbody.innerHTML += `
+            <tr>
+              <td>${semLabel}</td>
+              <td>-</td>
+              <td colspan="5" style="color:#94a3b8; font-style:italic;">Chưa có dữ liệu điểm</td>
+            </tr>
+          `;
+        } else {
+          const classRank = calculateRank(student, avg10Field, 'class_name');
+          const progRank = calculateRank(student, avg10Field, 'program_name');
+          const schoolRank = calculateRank(student, avg10Field, null);
+
+          tbody.innerHTML += `
+            <tr>
+              <td><strong>${semLabel}</strong></td>
+              <td>${n10}</td>
+              <td>
+                <span class="score-main">${avg10.toFixed(2)}</span>
+                <span class="score-sub">Tổng: ${sum10.toFixed(1)} (${avg10.toFixed(4)})</span>
+              </td>
+              <td>
+                <span class="score-main" style="font-weight:600; color:#334155;">${!isNaN(avg4) ? avg4.toFixed(2) : '-'}</span>
+              </td>
+              <td>${formatRankBadge(classRank)}</td>
+              <td>${formatRankBadge(progRank)}</td>
+              <td>${formatRankBadge(schoolRank)}</td>
+            </tr>
+          `;
+        }
+      });
+
+      // Dòng Trung bình tích lũy (Gộp tất cả các kỳ)
+      const overallAvg10 = parseFloat(student['OVERALL_DIEM_AVG']);
+      const overallSum10 = parseFloat(student['OVERALL_DIEM_SUM']);
+      const overallN10 = student['OVERALL_DIEM_N'];
+      const overallAvg4 = parseFloat(student['OVERALL_DIEMQUYDOI_AVG']);
+
+      if (!isNaN(overallAvg10)) {
+        const overallClassRank = calculateRank(student, 'OVERALL_DIEM_AVG', 'class_name');
+        const overallProgRank = calculateRank(student, 'OVERALL_DIEM_AVG', 'program_name');
+        const overallSchoolRank = calculateRank(student, 'OVERALL_DIEM_AVG', null);
+
+        tbody.innerHTML += `
+          <tr class="overall-row">
+            <td>Trung bình tích lũy (${semesters.length} kỳ)</td>
+            <td>${overallN10}</td>
+            <td>
+              <span class="score-main" style="color:#1e3a8a;">${overallAvg10.toFixed(2)}</span>
+              <span class="score-sub">Tổng: ${overallSum10.toFixed(1)} (${overallAvg10.toFixed(4)})</span>
+            </td>
+            <td>
+              <span class="score-main" style="font-weight:600; color:#1e3a8a;">${!isNaN(overallAvg4) ? overallAvg4.toFixed(2) : '-'}</span>
+            </td>
+            <td>${formatRankBadge(overallClassRank)}</td>
+            <td>${formatRankBadge(overallProgRank)}</td>
+            <td>${formatRankBadge(overallSchoolRank)}</td>
+          </tr>
+        `;
+      }
+    });
+  </script>
+</body>
+</html>
