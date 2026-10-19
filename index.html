@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Tra Cứu Điểm & Xếp Hạng Sinh Viên</title>
   <style>
     * {
@@ -20,37 +20,41 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px;
+      padding: 16px;
+      overflow-x: hidden;
     }
 
     .card {
       width: 100%;
-      max-width: 860px;
+      max-width: 880px;
       background: #ffffff;
-      padding: 32px;
+      padding: 28px;
       border-radius: 16px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
     }
 
     h1 {
       text-align: center;
-      font-size: 1.6rem;
+      font-size: 1.5rem;
       font-weight: 700;
       color: #0f172a;
-      margin-bottom: 24px;
+      margin-bottom: 22px;
+      line-height: 1.35;
     }
 
-    /* Khu vực ô nhập và nút submit ở chính giữa */
+    /* Form tìm kiếm ở giữa */
     .search-form {
       display: flex;
       justify-content: center;
       gap: 10px;
-      max-width: 480px;
+      max-width: 460px;
       margin: 0 auto;
+      width: 100%;
     }
 
     .search-form input {
       flex: 1;
+      min-width: 0; /* Chống tràn flex item trên mobile */
       padding: 12px 16px;
       font-size: 1rem;
       border: 1.5px solid #cbd5e1;
@@ -97,9 +101,10 @@
       text-align: center;
       margin-top: 16px;
       padding: 12px;
-      border-radius: 8px;
-      font-size: 0.95rem;
+      border-radius: 10px;
+      font-size: 0.92rem;
       display: none;
+      word-break: break-word;
     }
 
     .status-msg.error {
@@ -108,11 +113,11 @@
       border: 1px solid #fecaca;
     }
 
-    /* Khu vực hiển thị kết quả */
+    /* Khu vực kết quả */
     #resultSection {
       display: none;
-      margin-top: 28px;
-      padding-top: 24px;
+      margin-top: 24px;
+      padding-top: 22px;
       border-top: 1px solid #e2e8f0;
       animation: fadeIn 0.25s ease-in-out;
     }
@@ -122,46 +127,47 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Thông tin sinh viên */
+    /* Thông tin cá nhân */
     .student-profile {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
       background: #f8fafc;
-      padding: 16px 20px;
+      padding: 16px;
       border-radius: 12px;
       border-left: 4px solid #2563eb;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
     .profile-item span {
       display: block;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
       color: #64748b;
-      margin-bottom: 3px;
+      margin-bottom: 2px;
     }
 
     .profile-item strong {
-      font-size: 1.02rem;
+      font-size: 0.98rem;
       color: #0f172a;
+      word-break: break-word;
     }
 
-    /* Bảng tổng hợp điểm và xếp hạng */
+    /* Bảng dữ liệu trên máy tính */
     .table-wrapper {
-      overflow-x: auto;
+      width: 100%;
       border: 1px solid #e2e8f0;
       border-radius: 12px;
+      overflow: hidden;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.94rem;
-      min-width: 650px;
+      font-size: 0.92rem;
     }
 
     th, td {
-      padding: 13px 14px;
+      padding: 12px 10px;
       text-align: center;
       border-bottom: 1px solid #e2e8f0;
     }
@@ -170,25 +176,20 @@
       background-color: #f1f5f9;
       color: #334155;
       font-weight: 600;
-      font-size: 0.88rem;
+      font-size: 0.82rem;
       text-transform: uppercase;
       letter-spacing: 0.02em;
     }
 
     td:first-child, th:first-child {
       text-align: left;
-      padding-left: 18px;
+      padding-left: 16px;
     }
 
     tbody tr:last-child td {
       border-bottom: none;
     }
 
-    tbody tr:hover {
-      background-color: #f8fafc;
-    }
-
-    /* Dòng trung bình tích lũy */
     tr.overall-row {
       background-color: #eff6ff !important;
       font-weight: 600;
@@ -200,28 +201,29 @@
     }
 
     .score-main {
-      font-size: 1.05rem;
+      font-size: 1.02rem;
       font-weight: 700;
       color: #0f172a;
     }
 
     .score-sub {
       display: block;
-      font-size: 0.8rem;
+      font-size: 0.76rem;
       color: #64748b;
       font-weight: 400;
       margin-top: 2px;
     }
 
-    /* Huy hiệu thứ hạng */
+    /* Badge xếp hạng */
     .rank-badge {
       display: inline-block;
-      padding: 4px 10px;
+      padding: 4px 9px;
       border-radius: 999px;
       font-weight: 600;
-      font-size: 0.86rem;
+      font-size: 0.82rem;
       background: #e2e8f0;
       color: #334155;
+      white-space: nowrap;
     }
 
     .rank-top1 {
@@ -241,10 +243,346 @@
     }
 
     .note {
-      margin-top: 12px;
-      font-size: 0.82rem;
+      margin-top: 10px;
+      font-size: 0.8rem;
       color: #64748b;
       text-align: right;
+    }
+
+    /* Nút bật/tắt biểu đồ phổ điểm */
+    .chart-actions {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .btn-chart {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 20px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #1d4ed8;
+      background-color: #eff6ff;
+      border: 1.5px solid #bfdbfe;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-chart:hover {
+      background-color: #dbeafe;
+    }
+
+    /* Khu vực biểu đồ cột Phổ điểm */
+    #chartContainer {
+      display: none;
+      margin-top: 20px;
+      padding: 20px 16px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .chart-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .chart-subtitle {
+      font-size: 0.84rem;
+      color: #475569;
+      margin-top: 2px;
+    }
+
+    .scale-switch {
+      display: inline-flex;
+      background: #e2e8f0;
+      padding: 3px;
+      border-radius: 8px;
+    }
+
+    .scale-switch button {
+      border: none;
+      background: transparent;
+      padding: 5px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #475569;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .scale-switch button.active {
+      background: #ffffff;
+      color: #2563eb;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    /* Khung vẽ biểu đồ cột */
+    .bar-chart {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      height: 220px;
+      padding-top: 38px;
+      padding-bottom: 8px;
+      gap: 6px;
+      border-bottom: 2px solid #cbd5e1;
+    }
+
+    .bar-col {
+      flex: 1;
+      min-width: 0;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      position: relative;
+    }
+
+    .you-tag {
+      background: #ea580c;
+      color: #ffffff;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 5px;
+      border-radius: 4px;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      box-shadow: 0 2px 4px rgba(234, 88, 12, 0.3);
+      animation: bounce 1.2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+    .bar-count {
+      font-size: 0.75rem;
+      color: #64748b;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .bar-fill {
+      width: 100%;
+      max-width: 44px;
+      background: #93c5fd;
+      border-radius: 6px 6px 0 0;
+      transition: height 0.4s ease, background-color 0.2s;
+      min-height: 4px;
+    }
+
+    /* Tô đậm cột mà sinh viên đang ở */
+    .bar-col.is-user .bar-fill {
+      background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
+      box-shadow: 0 0 12px rgba(234, 88, 12, 0.45);
+      border: 1.5px solid #c2410c;
+      border-bottom: none;
+    }
+
+    .bar-col.is-user .bar-count {
+      color: #ea580c;
+      font-weight: 800;
+      font-size: 0.85rem;
+    }
+
+    .bar-labels {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .bar-label-item {
+      flex: 1;
+      min-width: 0;
+      text-align: center;
+      font-size: 0.72rem;
+      color: #475569;
+      font-weight: 500;
+      line-height: 1.2;
+      word-break: break-word;
+    }
+
+    .bar-label-item.is-user {
+      color: #ea580c;
+      font-weight: 800;
+    }
+
+    .chart-legend {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      margin-top: 14px;
+      font-size: 0.8rem;
+      color: #475569;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .legend-box {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    /* =====================================================
+       TỐI ƯU GIAO DIỆN ĐIỆN THOẠI (CHỐNG TRÀN 100%)
+       ===================================================== */
+    @media (max-width: 680px) {
+      body {
+        padding: 10px;
+        justify-content: flex-start;
+      }
+
+      .card {
+        padding: 18px 14px;
+        border-radius: 14px;
+      }
+
+      h1 {
+        font-size: 1.25rem;
+        margin-bottom: 16px;
+      }
+
+      .search-form {
+        flex-direction: column;
+      }
+
+      .search-form input,
+      .search-form button {
+        width: 100%;
+      }
+
+      .student-profile {
+        grid-template-columns: 1fr 1fr;
+        padding: 12px;
+        gap: 10px;
+      }
+
+      /* Biến bảng thành danh sách thẻ dọc (Card View) trên điện thoại */
+      .table-wrapper {
+        border: none;
+        background: transparent;
+      }
+
+      table, thead, tbody, th, td, tr {
+        display: block;
+        width: 100%;
+      }
+
+      thead tr {
+        display: none;
+      }
+
+      tbody tr {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        margin-bottom: 14px;
+        padding: 6px 12px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+      }
+
+      tbody tr.overall-row {
+        border: 2px solid #93c5fd;
+      }
+
+      tbody td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: right;
+        padding: 9px 4px;
+        border-bottom: 1px dashed #e2e8f0;
+      }
+
+      tbody td:first-child {
+        padding-left: 4px;
+        background: #f8fafc;
+        margin: -6px -12px 6px -12px;
+        padding: 10px 12px;
+        border-radius: 11px 11px 0 0;
+        border-bottom: 1px solid #e2e8f0;
+        justify-content: center;
+        text-align: center;
+        font-size: 0.96rem;
+      }
+
+      tbody tr.overall-row td:first-child {
+        background: #dbeafe;
+        border-top: none;
+      }
+
+      tbody td:last-child {
+        border-bottom: none;
+      }
+
+      tbody td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        font-size: 0.82rem;
+        color: #475569;
+        text-align: left;
+        padding-right: 10px;
+      }
+
+      tbody td:first-child::before {
+        display: none;
+      }
+
+      .note {
+        text-align: center;
+      }
+
+      .btn-chart {
+        width: 100%;
+        justify-content: center;
+      }
+
+      /* Tinh chỉnh biểu đồ vừa khít màn hình nhỏ */
+      .bar-chart {
+        height: 190px;
+        gap: 3px;
+      }
+
+      .bar-labels {
+        gap: 2px;
+      }
+
+      .bar-label-item {
+        font-size: 0.62rem;
+      }
+
+      .bar-count {
+        font-size: 0.68rem;
+      }
+
+      .you-tag {
+        font-size: 0.58rem;
+        padding: 2px 3px;
+      }
     }
   </style>
 </head>
@@ -285,8 +623,42 @@
           <tbody id="scoreTableBody"></tbody>
         </table>
       </div>
+
       <div class="note">
         * Xếp hạng tính theo <b>Điểm trung bình Hệ 10</b> (đồng điểm nhận cùng thứ hạng cao nhất).
+      </div>
+
+      <!-- Nút bật biểu đồ phổ điểm -->
+      <div class="chart-actions">
+        <button type="button" class="btn-chart" id="toggleChartBtn">
+          📊 Xem phổ điểm GPA kỳ gần nhất
+        </button>
+      </div>
+
+      <!-- Khung biểu đồ cột -->
+      <div id="chartContainer">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title" id="chartTitle">Phổ điểm GPA</div>
+            <div class="chart-subtitle" id="chartSubtitle"></div>
+          </div>
+          <div class="scale-switch">
+            <button type="button" id="btnScale10" class="active">Hệ 10</button>
+            <button type="button" id="btnScale4">Hệ 4 (GPA)</button>
+          </div>
+        </div>
+
+        <div class="bar-chart" id="barChart"></div>
+        <div class="bar-labels" id="barLabels"></div>
+
+        <div class="chart-legend">
+          <span class="legend-item">
+            <span class="legend-box" style="background:#93c5fd;"></span> Sinh viên khác
+          </span>
+          <span class="legend-item">
+            <span class="legend-box" style="background:#ea580c;"></span> <b>Khoảng điểm của bạn</b>
+          </span>
+        </div>
       </div>
     </div>
   </div>
@@ -295,17 +667,19 @@
     const CSV_FILE = 'tong_hop_diem_theo_hoc_ky.csv';
     let studentsData = [];
     let semesters = [];
+    let currentStudent = null;
+    let currentChartScale = 'DIEM'; // 'DIEM' (Hệ 10) hoặc 'DIEMQUYDOI' (Hệ 4)
 
     const submitBtn = document.getElementById('submitBtn');
     const statusMsg = document.getElementById('statusMsg');
     const resultSection = document.getElementById('resultSection');
+    const chartContainer = document.getElementById('chartContainer');
+    const toggleChartBtn = document.getElementById('toggleChartBtn');
 
-    // 1. Tải dữ liệu CSV bằng fetch khi mở trang
+    // 1. Tải dữ liệu CSV
     fetch(CSV_FILE)
       .then(response => {
-        if (!response.ok) {
-          throw new Error(`Không thể tải file ${CSV_FILE} (HTTP ${response.status})`);
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return response.text();
       })
       .then(csvText => {
@@ -315,19 +689,17 @@
         submitBtn.textContent = 'Submit';
       })
       .catch(err => {
-        showStatus(`Lỗi tải dữ liệu: ${err.message}. Hãy đảm bảo file "${CSV_FILE}" nằm cùng thư mục với index.html.`, true);
+        showStatus(`Không thể tải "${CSV_FILE}" (${err.message}). Hãy đặt file CSV cùng thư mục với index.html.`, true);
         submitBtn.textContent = 'Lỗi dữ liệu';
       });
 
-    // 2. Hàm phân tích CSV (xử lý BOM UTF-8)
+    // 2. Phân tích CSV
     function parseCSV(text) {
       const cleanText = text.replace(/^\uFEFF/, '').trim();
       const lines = cleanText.split(/\r?\n/);
       if (lines.length < 2) return [];
 
       const headers = lines[0].split(',').map(h => h.trim());
-
-      // Tự động lấy danh sách các kỳ học có trong CSV (VD: 2025_2026_HK1, 2025_2026_HK2)
       const semSet = new Set();
       headers.forEach(h => {
         const match = h.match(/^(\d{4}_\d{4}_HK\d+)_DIEM_AVG$/);
@@ -349,7 +721,7 @@
       return rows;
     }
 
-    // 3. Tính điểm trung bình tích lũy gộp các kỳ (Tổng SUM / Tổng N) theo đúng Tutorial.MD
+    // 3. Tính trung bình tích lũy có trọng số (Tổng SUM / Tổng N)
     function computeOverallScores(data) {
       data.forEach(student => {
         ['DIEM', 'DIEMQUYDOI'].forEach(kind => {
@@ -367,44 +739,38 @@
 
           student[`OVERALL_${kind}_N`] = totalN;
           student[`OVERALL_${kind}_SUM`] = totalSum;
-          // Lưu giá trị chính xác để xếp hạng không bị sai số làm tròn
           student[`OVERALL_${kind}_AVG`] = totalN > 0 ? (totalSum / totalN) : NaN;
         });
       });
     }
 
-    // 4. Tính thứ hạng theo chuẩn method="min" dựa trên Điểm Hệ 10
-    // groupField = 'class_name' (Lớp) | 'program_name' (Ngành) | null (Toàn trường)
+    // 4. Tính thứ hạng method="min"
     function calculateRank(targetStudent, scoreField, groupField = null) {
       const targetScore = parseFloat(targetStudent[scoreField]);
       if (isNaN(targetScore)) return null;
 
-      // Lọc danh sách sinh viên cùng nhóm và có điểm hợp lệ ở kỳ đó
       const validPeers = studentsData.filter(s => {
         const score = parseFloat(s[scoreField]);
         if (isNaN(score)) return false;
-        if (!groupField) return true; // Toàn trường
+        if (!groupField) return true;
         return s[groupField] === targetStudent[groupField];
       });
 
-      // Đếm số người có điểm lớn hơn (dùng sai số 1e-9 để tránh lỗi dấu phẩy động JS)
       const higherCount = validPeers.filter(s => (parseFloat(s[scoreField]) - targetScore) > 1e-9).length;
-
-      return {
-        rank: higherCount + 1,
-        total: validPeers.length
-      };
+      return { rank: higherCount + 1, total: validPeers.length };
     }
 
-    // 5. Định dạng badge hiển thị thứ hạng
     function formatRankBadge(rankObj) {
       if (!rankObj) return '-';
       let badgeClass = 'rank-badge';
       if (rankObj.rank === 1) badgeClass += ' rank-top1';
       else if (rankObj.rank <= 3) badgeClass += ' rank-top3';
       else if (rankObj.rank <= 10) badgeClass += ' rank-top10';
-
       return `<span class="${badgeClass}">#${rankObj.rank} / ${rankObj.total}</span>`;
+    }
+
+    function formatSemName(sem) {
+      return sem.replace(/^(\d{4})_(\d{4})_HK(\d+)$/, 'Học kỳ $3 ($1 - $2)');
     }
 
     function showStatus(msg, isError = false) {
@@ -413,7 +779,105 @@
       statusMsg.style.display = 'block';
     }
 
-    // 6. Xử lý khi người dùng nhấn Submit
+    // 5. Tìm kỳ gần nhất có điểm của sinh viên (hoặc của danh sách)
+    function getLatestSemesterForStudent(student) {
+      for (let i = semesters.length - 1; i >= 0; i--) {
+        const sem = semesters[i];
+        const val = parseFloat(student[`${sem}_DIEM_AVG`]);
+        if (!isNaN(val)) return sem;
+      }
+      return semesters[semesters.length - 1];
+    }
+
+    // 6. Vẽ biểu đồ cột phổ điểm và tô đậm vị trí người dùng
+    function renderDistributionChart() {
+      if (!currentStudent) return;
+
+      const latestSem = getLatestSemesterForStudent(currentStudent);
+      const field = `${latestSem}_${currentChartScale}_AVG`;
+      const userScore = parseFloat(currentStudent[field]);
+
+      // Định nghĩa các khoảng điểm (Bins)
+      const bins = currentChartScale === 'DIEM'
+        ? [
+            { label: '< 4.0', min: 0, max: 4.0 },
+            { label: '4.0 - 4.9', min: 4.0, max: 5.0 },
+            { label: '5.0 - 5.9', min: 5.0, max: 6.0 },
+            { label: '6.0 - 6.9', min: 6.0, max: 7.0 },
+            { label: '7.0 - 7.9', min: 7.0, max: 8.0 },
+            { label: '8.0 - 8.9', min: 8.0, max: 9.0 },
+            { label: '9.0 - 10', min: 9.0, max: 10.01 }
+          ]
+        : [
+            { label: '< 1.0', min: 0, max: 1.0 },
+            { label: '1.0 - 1.9', min: 1.0, max: 2.0 },
+            { label: '2.0 - 2.4', min: 2.0, max: 2.5 },
+            { label: '2.5 - 3.1', min: 2.5, max: 3.2 },
+            { label: '3.2 - 3.5', min: 3.2, max: 3.6 },
+            { label: '3.6 - 4.0', min: 3.6, max: 4.01 }
+          ];
+
+      bins.forEach(b => { b.count = 0; b.isUser = false; });
+
+      let totalValid = 0;
+      studentsData.forEach(s => {
+        const val = parseFloat(s[field]);
+        if (isNaN(val)) return;
+        totalValid++;
+        for (let b of bins) {
+          if (val >= b.min && val < b.max) {
+            b.count++;
+            break;
+          }
+        }
+      });
+
+      // Xác định cột của người dùng đang tra cứu
+      let userBinLabel = '';
+      if (!isNaN(userScore)) {
+        for (let b of bins) {
+          if (userScore >= b.min && userScore < b.max) {
+            b.isUser = true;
+            userBinLabel = b.label;
+            break;
+          }
+        }
+      }
+
+      const maxCount = Math.max(...bins.map(b => b.count), 1);
+      const scaleName = currentChartScale === 'DIEM' ? 'Hệ 10' : 'Hệ 4 (Quy đổi)';
+
+      document.getElementById('chartTitle').textContent =
+        `Phổ điểm ${scaleName} — ${formatSemName(latestSem)}`;
+      document.getElementById('chartSubtitle').innerHTML = !isNaN(userScore)
+        ? `Điểm của <b>${currentStudent.full_name}</b>: <b style="color:#ea580c">${userScore.toFixed(2)}</b> (Thuộc nhóm <b>${userBinLabel}</b> trên tổng ${totalValid} SV)`
+        : `Sinh viên chưa có điểm ở kỳ này`;
+
+      const barChartEl = document.getElementById('barChart');
+      const barLabelsEl = document.getElementById('barLabels');
+      barChartEl.innerHTML = '';
+      barLabelsEl.innerHTML = '';
+
+      bins.forEach(b => {
+        const heightPercent = Math.round((b.count / maxCount) * 100);
+        const colClass = b.isUser ? 'bar-col is-user' : 'bar-col';
+        const labelClass = b.isUser ? 'bar-label-item is-user' : 'bar-label-item';
+
+        barChartEl.innerHTML += `
+          <div class="${colClass}">
+            ${b.isUser ? '<div class="you-tag">▼ Bạn</div>' : ''}
+            <div class="bar-count">${b.count}</div>
+            <div class="bar-fill" style="height: ${Math.max(heightPercent, 3)}%;"></div>
+          </div>
+        `;
+
+        barLabelsEl.innerHTML += `
+          <div class="${labelClass}">${b.label}</div>
+        `;
+      });
+    }
+
+    // 7. Sự kiện Submit tra cứu
     document.getElementById('searchForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const inputCode = document.getElementById('studentCodeInput').value.trim().toUpperCase();
@@ -427,10 +891,10 @@
         return;
       }
 
+      currentStudent = student;
       statusMsg.style.display = 'none';
       resultSection.style.display = 'block';
 
-      // Hiển thị thông tin cá nhân
       document.getElementById('studentProfile').innerHTML = `
         <div class="profile-item">
           <span>Họ và tên</span>
@@ -445,17 +909,16 @@
           <strong>${student.class_name}</strong>
         </div>
         <div class="profile-item">
-          <span>Ngành / Chương trình</span>
+          <span>Ngành học</span>
           <strong>${student.program_name}</strong>
         </div>
       `;
 
-      // Hiển thị bảng tổng hợp các kỳ học
       const tbody = document.getElementById('scoreTableBody');
       tbody.innerHTML = '';
 
       semesters.forEach(sem => {
-        const semLabel = sem.replace(/^(\d{4})_(\d{4})_HK(\d+)$/, 'Học kỳ $3 ($1 - $2)');
+        const semLabel = formatSemName(sem);
         const avg10Field = `${sem}_DIEM_AVG`;
         const sum10Field = `${sem}_DIEM_SUM`;
         const n10Field = `${sem}_DIEM_N`;
@@ -469,9 +932,8 @@
         if (isNaN(avg10)) {
           tbody.innerHTML += `
             <tr>
-              <td>${semLabel}</td>
-              <td>-</td>
-              <td colspan="5" style="color:#94a3b8; font-style:italic;">Chưa có dữ liệu điểm</td>
+              <td data-label="Kỳ học"><strong>${semLabel}</strong></td>
+              <td data-label="Trạng thái" colspan="6" style="color:#94a3b8; font-style:italic;">Chưa có dữ liệu điểm</td>
             </tr>
           `;
         } else {
@@ -481,24 +943,26 @@
 
           tbody.innerHTML += `
             <tr>
-              <td><strong>${semLabel}</strong></td>
-              <td>${n10}</td>
-              <td>
-                <span class="score-main">${avg10.toFixed(2)}</span>
-                <span class="score-sub">Tổng: ${sum10.toFixed(1)} (${avg10.toFixed(4)})</span>
+              <td data-label="Kỳ học"><strong>${semLabel}</strong></td>
+              <td data-label="Số môn">${n10}</td>
+              <td data-label="Điểm Hệ 10">
+                <div>
+                  <span class="score-main">${avg10.toFixed(2)}</span>
+                  <span class="score-sub">Tổng: ${sum10.toFixed(1)} (${avg10.toFixed(4)})</span>
+                </div>
               </td>
-              <td>
+              <td data-label="Điểm Hệ 4">
                 <span class="score-main" style="font-weight:600; color:#334155;">${!isNaN(avg4) ? avg4.toFixed(2) : '-'}</span>
               </td>
-              <td>${formatRankBadge(classRank)}</td>
-              <td>${formatRankBadge(progRank)}</td>
-              <td>${formatRankBadge(schoolRank)}</td>
+              <td data-label="Hạng Lớp">${formatRankBadge(classRank)}</td>
+              <td data-label="Hạng Ngành">${formatRankBadge(progRank)}</td>
+              <td data-label="Hạng Trường">${formatRankBadge(schoolRank)}</td>
             </tr>
           `;
         }
       });
 
-      // Dòng Trung bình tích lũy (Gộp tất cả các kỳ)
+      // Dòng trung bình tích lũy
       const overallAvg10 = parseFloat(student['OVERALL_DIEM_AVG']);
       const overallSum10 = parseFloat(student['OVERALL_DIEM_SUM']);
       const overallN10 = student['OVERALL_DIEM_N'];
@@ -511,21 +975,55 @@
 
         tbody.innerHTML += `
           <tr class="overall-row">
-            <td>Trung bình tích lũy (${semesters.length} kỳ)</td>
-            <td>${overallN10}</td>
-            <td>
-              <span class="score-main" style="color:#1e3a8a;">${overallAvg10.toFixed(2)}</span>
-              <span class="score-sub">Tổng: ${overallSum10.toFixed(1)} (${overallAvg10.toFixed(4)})</span>
+            <td data-label="Kỳ học">Trung bình tích lũy (${semesters.length} kỳ)</td>
+            <td data-label="Tổng số môn">${overallN10}</td>
+            <td data-label="TB Tích lũy Hệ 10">
+              <div>
+                <span class="score-main" style="color:#1e3a8a;">${overallAvg10.toFixed(2)}</span>
+                <span class="score-sub">Tổng: ${overallSum10.toFixed(1)} (${overallAvg10.toFixed(4)})</span>
+              </div>
             </td>
-            <td>
+            <td data-label="TB Tích lũy Hệ 4">
               <span class="score-main" style="font-weight:600; color:#1e3a8a;">${!isNaN(overallAvg4) ? overallAvg4.toFixed(2) : '-'}</span>
             </td>
-            <td>${formatRankBadge(overallClassRank)}</td>
-            <td>${formatRankBadge(overallProgRank)}</td>
-            <td>${formatRankBadge(overallSchoolRank)}</td>
+            <td data-label="Hạng Lớp">${formatRankBadge(overallClassRank)}</td>
+            <td data-label="Hạng Ngành">${formatRankBadge(overallProgRank)}</td>
+            <td data-label="Hạng Trường">${formatRankBadge(overallSchoolRank)}</td>
           </tr>
         `;
       }
+
+      // Cập nhật lại biểu đồ nếu đang mở
+      if (chartContainer.style.display === 'block') {
+        renderDistributionChart();
+      }
+    });
+
+    // 8. Sự kiện bật/tắt biểu đồ và chuyển hệ điểm trên biểu đồ
+    toggleChartBtn.addEventListener('click', function() {
+      const isHidden = chartContainer.style.display === 'none' || chartContainer.style.display === '';
+      if (isHidden) {
+        chartContainer.style.display = 'block';
+        toggleChartBtn.innerHTML = '🔼 Ẩn phổ điểm GPA kỳ gần nhất';
+        renderDistributionChart();
+      } else {
+        chartContainer.style.display = 'none';
+        toggleChartBtn.innerHTML = '📊 Xem phổ điểm GPA kỳ gần nhất';
+      }
+    });
+
+    document.getElementById('btnScale10').addEventListener('click', function() {
+      currentChartScale = 'DIEM';
+      this.classList.add('active');
+      document.getElementById('btnScale4').classList.remove('active');
+      renderDistributionChart();
+    });
+
+    document.getElementById('btnScale4').addEventListener('click', function() {
+      currentChartScale = 'DIEMQUYDOI';
+      this.classList.add('active');
+      document.getElementById('btnScale10').classList.remove('active');
+      renderDistributionChart();
     });
   </script>
 </body>
